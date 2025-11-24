@@ -1,0 +1,81 @@
+{
+  "name": "LocalAI Fine-tune & Deploy",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [200, 280]
+    },
+    {
+      "parameters": {
+        "baseModel": "llama3.1:8b",
+        "datasetPath": "s3://amodels-datasets/localai/adapters/latest.jsonl",
+        "deploymentChannel": "staging",
+        "notes": "Adjust dataset path per release."
+      },
+      "id": "deploy-localai",
+      "name": "Deploy LocalAI Model",
+      "type": "n8n-nodes-amodels.deployLocalAiModel",
+      "typeVersion": 1,
+      "position": [540, 280],
+      "credentials": {
+        "aModelsApi": "amodelsApi"
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://telemetry-exporter/api/events",
+        "method": "POST",
+        "jsonParameters": true,
+        "sendBody": true,
+        "bodyParametersJson": "={ {\n  \"event\": \"localai-deploy\",\n  \"adapterId\": $json[\"adapterId\"],\n  \"deploymentId\": $json[\"deploymentId\"],\n  \"status\": $json[\"status\"],\n  \"channel\": $json[\"deploymentChannel\"]\n} }"
+      },
+      "id": "telemetry",
+      "name": "Telemetry Event",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [860, 280],
+      "credentials": {
+        "httpBasicAuth": "telemetryApi"
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Deploy LocalAI Model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deploy LocalAI Model": {
+      "main": [
+        [
+          {
+            "node": "Telemetry Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "saveManualExecutions": true,
+    "executionOrder": "v1"
+  },
+  "tags": ["localai", "fine-tune"],
+  "versionId": "tmpl-localai-finetune",
+  "meta": {
+    "templateVersion": "1.0.0",
+    "description": "Fine-tune adapters and deploy them to LocalAI runtimes."
+  }
+}
+

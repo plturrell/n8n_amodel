@@ -1,0 +1,65 @@
+{
+    "name": "@n8n/nodes-amodels",
+    "version": "1.0.0",
+    "description": "Custom n8n nodes for aModels services",
+    "license": "MIT",
+    "homepage": "https://github.com/amodels/n8n-nodes-amodels",
+    "author": {
+        "name": "aModels Team"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/amodels/n8n-nodes-amodels.git"
+    },
+    "main": "index.js",
+    "scripts": {
+        "build": "tsc && gulp build:icons",
+        "dev": "tsc --watch",
+        "format": "prettier nodes --write",
+        "lint": "eslint nodes --ext .ts",
+        "lintfix": "eslint nodes --ext .ts --fix",
+        "prepublishOnly": "npm run build && npm run lint",
+        "test": "jest"
+    },
+    "files": [
+        "dist"
+    ],
+    "n8n": {
+        "n8nNodesApiVersion": 1,
+        "credentials": [
+            "dist/credentials/AModelsApi.credentials.js"
+        ],
+        "nodes": [
+            "dist/nodes/OCR/OCRNode.node.js",
+            "dist/nodes/Translation/TranslationNode.node.js",
+            "dist/nodes/ModelInference/ModelInferenceNode.node.js",
+            "dist/nodes/Dataset/DatasetNode.node.js",
+            "dist/nodes/GatewayApi/GatewayApiNode.node.js",
+            "dist/nodes/Training/SubmitLnnTraining.node.js",
+            "dist/nodes/Training/SubmitGnnTraining.node.js",
+            "dist/nodes/LocalAi/DeployLocalAiModel.node.js",
+            "dist/nodes/Graph/PublishToGraph.node.js",
+            "dist/nodes/Toom/ValidateToomConfig.node.js"
+        ]
+    },
+    "devDependencies": {
+        "@types/jest": "^29.5.0",
+        "@types/node": "^18.16.0",
+        "@typescript-eslint/eslint-plugin": "^5.59.0",
+        "@typescript-eslint/parser": "^5.59.0",
+        "eslint": "^8.40.0",
+        "eslint-plugin-n8n-nodes-base": "^1.11.0",
+        "gulp": "^4.0.2",
+        "jest": "^29.5.0",
+        "n8n-workflow": "^1.0.0",
+        "prettier": "^2.8.8",
+        "ts-jest": "^29.1.0",
+        "typescript": "^5.0.4"
+    },
+    "peerDependencies": {
+        "n8n-workflow": "*"
+    },
+    "dependencies": {
+        "axios": "^1.4.0"
+    }
+}

@@ -18,6 +18,33 @@ class OidcConfig {
 }
 
 @Config
+class XSUAAConfig {
+	/** Whether to enable XSUAA (SAP BTP) authentication */
+	@Env('N8N_XSUAA_ENABLED')
+	enabled: boolean = false;
+
+	/** XSUAA Client ID */
+	@Env('N8N_XSUAA_CLIENT_ID')
+	clientId: string = '';
+
+	/** XSUAA Client Secret */
+	@Env('N8N_XSUAA_CLIENT_SECRET')
+	clientSecret: string = '';
+
+	/** XSUAA URL (e.g., https://your-tenant.authentication.eu10.hana.ondemand.com) */
+	@Env('N8N_XSUAA_URL')
+	url: string = '';
+
+	/** XSUAA Redirect URI */
+	@Env('N8N_XSUAA_REDIRECT_URI')
+	redirectUri: string = '';
+
+	/** XSUAA Scope mapping to n8n roles (JSON string: {"xsuaa_scope": "n8n_role"}) */
+	@Env('N8N_XSUAA_SCOPE_ROLE_MAPPING')
+	scopeRoleMapping: string = '{}';
+}
+
+@Config
 class LdapConfig {
 	/** Whether to enable LDAP SSO. */
 	@Env('N8N_SSO_LDAP_LOGIN_ENABLED')
@@ -71,4 +98,7 @@ export class SsoConfig {
 
 	@Nested
 	provisioning: ProvisioningConfig;
+
+	@Nested
+	xsuaa: XSUAAConfig;
 }

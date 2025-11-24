@@ -33,6 +33,7 @@ import { InternalServerError } from '@/errors/response-errors/internal-server.er
 import { ProvisioningService } from '@/modules/provisioning.ee/provisioning.service.ee';
 import { JwtService } from '@/services/jwt.service';
 import { UrlService } from '@/services/url.service';
+import { RoleRepository } from '@n8n/db';
 
 const DEFAULT_OIDC_CONFIG: OidcConfigDto = {
 	clientId: '',
@@ -65,6 +66,7 @@ export class OidcService {
 		private readonly urlService: UrlService,
 		private readonly globalConfig: GlobalConfig,
 		private readonly userRepository: UserRepository,
+		private readonly roleRepository: RoleRepository,
 		private readonly cipher: Cipher,
 		private readonly logger: Logger,
 		private readonly jwtService: JwtService,
@@ -319,6 +321,39 @@ export class OidcService {
 		const provisioningConfig = await this.provisioningService.getConfig();
 		const projectRoleMapping = claims[provisioningConfig.scopesProjectsRolesClaimName];
 		const instanceRole = claims[provisioningConfig.scopesInstanceRoleClaimName];
+		
+		// Check if this is XSUAA (SAP BTP) authentication
+		const isXSUAA = this.globalConfig.getEnv('sso.xsuaa.enabled') === true;
+		
+		if (isXSUAA) {
+			// Map XSUAA scopes to n8n roles
+			const scopeRoleMappingStr = this.globalConfig.getEnv('sso.xsuaa.scopeRoleMapping') || '{}';
+			let scopeRoleMapping: Record<string, string> = {};
+			try {
+				scopeRoleMapping = JSON.parse(scopeRoleMappingStr);
+			} catch (e) {
+				this.logger.warn('Failed to parse XSUAA scope role mapping', { error: e });
+			}
+			
+			// Extract scopes from claims (XSUAA typically provides scopes in claims.scope or claims.authorities)
+			const scopes = claims.scope?.split(' ') || claims.authorities || [];
+			if (scopes.length > 0 && Object.keys(scopeRoleMapping).length > 0) {
+				for (const scope of scopes) {
+					if (scopeRoleMapping[scope]) {
+						const mappedRoleSlug = scopeRoleMapping[scope];
+						const mappedRole = await this.roleRepository.findOne({
+							where: { slug: mappedRoleSlug },
+						});
+						if (mappedRole) {
+							user.role = mappedRole;
+							await this.userRepository.save(user);
+							break; // Use first matching role
+						}
+					}
+				}
+			}
+		}
+		
 		if (instanceRole) {
 			await this.provisioningService.provisionInstanceRoleForUser(user, instanceRole);
 		}

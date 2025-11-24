@@ -8,6 +8,7 @@ import { isEmail } from 'class-validator';
 import { Response } from 'express';
 
 import { handleEmailLogin } from '@/auth';
+import { handlePostgresLogin } from '@/auth/methods/postgres';
 import { AuthService } from '@/auth/auth.service';
 import { RESPONSE_ERROR_MESSAGES } from '@/constants';
 import { AuthError } from '@/errors/response-errors/auth.error';
@@ -23,6 +24,8 @@ import {
 	getCurrentAuthenticationMethod,
 	isLdapCurrentAuthenticationMethod,
 	isOidcCurrentAuthenticationMethod,
+	isPostgresAuthEnabled,
+	isPostgresCurrentAuthenticationMethod,
 	isSamlCurrentAuthenticationMethod,
 	isSsoCurrentAuthenticationMethod,
 } from '@/sso.ee/sso-helpers';
@@ -57,7 +60,15 @@ export class AuthController {
 			throw new BadRequestError('Invalid email address');
 		}
 
-		if (isSamlCurrentAuthenticationMethod() || isOidcCurrentAuthenticationMethod()) {
+		if (isPostgresAuthEnabled() && isPostgresCurrentAuthenticationMethod()) {
+			// Try Postgres auth first if enabled
+			user = await handlePostgresLogin(emailOrLdapLoginId, password);
+			if (user) {
+				usedAuthenticationMethod = 'postgres';
+			}
+		}
+
+		if (!user && (isSamlCurrentAuthenticationMethod() || isOidcCurrentAuthenticationMethod())) {
 			// attempt to fetch user data with the credentials, but don't log in yet
 			const preliminaryUser = await handleEmailLogin(emailOrLdapLoginId, password);
 			// if the user is an owner, continue with the login
@@ -70,7 +81,7 @@ export class AuthController {
 			} else {
 				throw new AuthError('SSO is enabled, please log in with SSO');
 			}
-		} else if (isLdapCurrentAuthenticationMethod()) {
+		} else if (!user && isLdapCurrentAuthenticationMethod()) {
 			const preliminaryUser = await handleEmailLogin(emailOrLdapLoginId, password);
 			if (preliminaryUser?.role.slug === GLOBAL_OWNER_ROLE.slug) {
 				user = preliminaryUser;
@@ -79,7 +90,8 @@ export class AuthController {
 				const { LdapService } = await import('@/ldap.ee/ldap.service.ee');
 				user = await Container.get(LdapService).handleLdapLogin(emailOrLdapLoginId, password);
 			}
-		} else {
+		} else if (!user) {
+			// Fallback to email auth if Postgres auth didn't work or isn't enabled
 			user = await handleEmailLogin(emailOrLdapLoginId, password);
 		}
 

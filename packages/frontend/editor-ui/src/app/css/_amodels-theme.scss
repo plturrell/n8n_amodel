@@ -1,0 +1,194 @@
+/**
+ * aModels Theme Override for n8n
+ * 
+ * This file overrides n8n's default theme with aModels design tokens
+ * to create a consistent visual experience across the platform.
+ */
+
+:root {
+    /* ===================================
+     Primary Brand Colors
+     =================================== */
+    --color--primary: #0066CC !important;
+    --color--primary--shade-1: #0052A3 !important;
+    --color--primary--tint-1: #3385D6 !important;
+    --color--primary--tint-2: #80B3E6 !important;
+    --color--primary--tint-3: #E8F4FF !important;
+
+    /* ===================================
+     Secondary Colors
+     =================================== */
+    --color--secondary: #6366F1 !important;
+    --color--success: #10B981 !important;
+    --color--warning: #F59E0B !important;
+    --color--danger: #EF4444 !important;
+    --color--info: #0066CC !important;
+
+    /* ===================================
+     Background Colors
+     =================================== */
+    --color--background: #FFFFFF !important;
+    --color--background--light-1: #FAFBFC !important;
+    --color--background--light-2: #F8F9FA !important;
+    --color--background--light-3: #F1F3F5 !important;
+
+    /* ===================================
+     Text Colors
+     =================================== */
+    --color--text--shade-1: #1A1D21 !important;
+    --color--text: #5A6872 !important;
+    --color--text--tint-1: #8B9CAB !important;
+    --color--text--tint-2: #B0BCC9 !important;
+    --color--text--tint-3: #D4DBE3 !important;
+
+    /* ===================================
+     Foreground/Border Colors
+     =================================== */
+    --color--foreground: #E1E5E9 !important;
+    --color--foreground--shade-1: #C8D1DA !important;
+    --color--foreground--shade-2: #A8B4C1 !important;
+
+    /* ===================================
+     Border Styles
+     =================================== */
+    --border: 1px solid #E1E5E9 !important;
+    --border-radius-base: 8px !important;
+    --border-radius-large: 12px !important;
+    --border-radius-xlarge: 16px !important;
+
+    /* ===================================
+     Typography
+     =================================== */
+    --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
+    --font-size-xs: 12px !important;
+    --font-size-s: 14px !important;
+    --font-size-m: 16px !important;
+    --font-size-l: 18px !important;
+    --font-size-xl: 20px !important;
+    --font-size-2xl: 24px !important;
+
+    /* ===================================
+     Spacing (8px grid)
+     =================================== */
+    --spacing-5xs: 2px !important;
+    --spacing-4xs: 4px !important;
+    --spacing-3xs: 6px !important;
+    --spacing-2xs: 8px !important;
+    --spacing-xs: 12px !important;
+    --spacing-s: 16px !important;
+    --spacing-m: 20px !important;
+    --spacing-l: 24px !important;
+    --spacing-xl: 32px !important;
+    --spacing-2xl: 40px !important;
+    --spacing-3xl: 48px !important;
+
+    /* ===================================
+     Shadows
+     =================================== */
+    --box-shadow-base: 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+    --box-shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    --box-shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    --box-shadow-dark: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+
+    /* ===================================
+     Component-Specific Overrides
+     =================================== */
+
+    /* Buttons */
+    --button-font-color: #FFFFFF !important;
+    --button-background-color: #0066CC !important;
+    --button-active-background-color: #0052A3 !important;
+    --button-hover-background-color: #3385D6 !important;
+
+    /* Inputs */
+    --input-border-color: #E1E5E9 !important;
+    --input-background-color: #FFFFFF !important;
+    --input-focus-border-color: #0066CC !important;
+
+    /* Sidebar */
+    --sidebar-background-color: #FFFFFF !important;
+    --sidebar-border-color: #E1E5E9 !important;
+
+    /* Header */
+    --header-background-color: #FFFFFF !important;
+    --header-border-color: #E1E5E9 !important;
+
+    /* Cards */
+    --card-background-color: #FFFFFF !important;
+    --card-border-color: #E1E5E9 !important;
+    --card-hover-border-color: #C8D1DA !important;
+
+    /* Node Colors - keep workflow nodes visually distinct */
+    --node-type-main-color: #0066CC !important;
+    --node-type-trigger-color: #10B981 !important;
+    --node-type-webhook-color: #6366F1 !important;
+}
+
+/* ===================================
+   Global Overrides
+   =================================== */
+
+body {
+    font-family: var(--font-family) !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Smooth transitions */
+* {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Button refinements */
+.el-button--primary {
+    background-color: var(--color--primary) !important;
+    border-color: var(--color--primary) !important;
+}
+
+.el-button--primary:hover {
+    background-color: var(--color--primary--shade-1) !important;
+    border-color: var(--color--primary--shade-1) !important;
+}
+
+/* Input refinements */
+.el-input__inner {
+    border-radius: var(--border-radius-base) !important;
+}
+
+.el-input__inner:focus {
+    border-color: var(--color--primary) !important;
+    box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2) !important;
+}
+
+/* Card refinements */
+.el-card {
+    border-radius: var(--border-radius-large) !important;
+    border-color: var(--color--foreground) !important;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color--background--light-2);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color--foreground);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color--foreground--shade-1);
+}
+
+/* ===================================
+   Logo & Branding
+   =================================== */
+
+/* Logo is already replaced via SVG files in N8nLogo component */
+
+/* Page title customization handled by HTML meta tags */

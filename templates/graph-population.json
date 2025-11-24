@@ -1,0 +1,137 @@
+{
+  "name": "Graph Knowledge Base Population",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "sync/graph",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Extraction Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [120, 200]
+    },
+    {
+      "parameters": {
+        "validationMode": "checksum",
+        "payloadJson": "={{$json[\"body\"]}}",
+        "notes": "Ensures extraction batch metadata is intact."
+      },
+      "id": "publish-graph",
+      "name": "Publish To Graph",
+      "type": "n8n-nodes-amodels.publishToGraph",
+      "typeVersion": 1,
+      "position": [440, 200],
+      "credentials": {
+        "aModelsApi": "amodelsApi"
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json[\"status\"]}}",
+              "operation": "equal",
+              "value2": "failed"
+            }
+          ]
+        }
+      },
+      "id": "if-failed",
+      "name": "Check Failure",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://telemetry-exporter/api/events",
+        "method": "POST",
+        "jsonParameters": true,
+        "sendBody": true,
+        "bodyParametersJson": "={ {\n  \"event\": \"graph-population\",\n  \"batchId\": $json[\"batchId\"],\n  \"status\": $json[\"status\"],\n  \"nodesIngested\": $json[\"summary\"]?.nodes,\n  \"relsIngested\": $json[\"summary\"]?.relationships\n} }"
+      },
+      "id": "telemetry-success",
+      "name": "Telemetry Success",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [940, 120],
+      "credentials": {
+        "httpBasicAuth": "telemetryApi"
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://telemetry-exporter/api/events",
+        "method": "POST",
+        "jsonParameters": true,
+        "sendBody": true,
+        "bodyParametersJson": "={ {\n  \"event\": \"graph-population-error\",\n  \"batchId\": $json[\"batchId\"],\n  \"status\": $json[\"status\"],\n  \"error\": $json[\"error\"]\n} }"
+      },
+      "id": "telemetry-failure",
+      "name": "Telemetry Failure",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [940, 300],
+      "credentials": {
+        "httpBasicAuth": "telemetryApi"
+      }
+    }
+  ],
+  "connections": {
+    "Extraction Webhook": {
+      "main": [
+        [
+          {
+            "node": "Publish To Graph",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish To Graph": {
+      "main": [
+        [
+          {
+            "node": "Check Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Failure": {
+      "main": [
+        [
+          {
+            "node": "Telemetry Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telemetry Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "saveDataErrorExecution": "all",
+    "executionOrder": "v1"
+  },
+  "tags": ["graph", "extraction"],
+  "versionId": "tmpl-graph-population",
+  "meta": {
+    "templateVersion": "1.0.0",
+    "description": "Validates extraction payloads and loads them into the graph KB."
+  }
+}
+

@@ -72,6 +72,18 @@ export function isEmailCurrentAuthenticationMethod(): boolean {
 	return getCurrentAuthenticationMethod() === 'email';
 }
 
+export function isPostgresCurrentAuthenticationMethod(): boolean {
+	return getCurrentAuthenticationMethod() === 'postgres';
+}
+
+export function isPostgresAuthEnabled(): boolean {
+	try {
+		return config.getEnv('userManagement.postgresAuth.enabled') === true;
+	} catch {
+		return false;
+	}
+}
+
 export function isSsoJustInTimeProvisioningEnabled(): boolean {
 	return Container.get(GlobalConfig).sso.justInTimeProvisioning;
 }

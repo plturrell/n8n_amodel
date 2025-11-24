@@ -35,6 +35,18 @@ export const useSSOStore = defineStore('sso', () => {
 	const getSSORedirectUrl = async (existingRedirect?: string) =>
 		await ssoApi.initSSO(rootStore.restApiContext, existingRedirect);
 
+	const postgresAuth = ref<{ enabled: boolean }>({
+		enabled: false,
+	});
+
+	const xsuaaAuth = ref<{ enabled: boolean; loginUrl?: string }>({
+		enabled: false,
+		loginUrl: undefined,
+	});
+
+	const isPostgresAuthEnabled = computed(() => postgresAuth.value.enabled);
+	const isXSUAAEnabled = computed(() => xsuaaAuth.value.enabled);
+
 	const initialize = (options: {
 		authenticationMethod: UserManagementAuthenticationMethod;
 		config: {
@@ -44,11 +56,15 @@ export const useSSOStore = defineStore('sso', () => {
 				loginUrl?: string;
 				callbackUrl?: string;
 			};
+			postgres?: { enabled: boolean };
+			xsuaa?: { enabled: boolean; loginUrl?: string };
 		};
 		features: {
 			saml: boolean;
 			ldap: boolean;
 			oidc: boolean;
+			postgres?: boolean;
+			xsuaa?: boolean;
 		};
 	}) => {
 		authenticationMethod.value = options.authenticationMethod;
@@ -70,6 +86,17 @@ export const useSSOStore = defineStore('sso', () => {
 			oidc.value.loginEnabled = options.config.oidc.loginEnabled;
 			oidc.value.loginUrl = options.config.oidc.loginUrl || '';
 			oidc.value.callbackUrl = options.config.oidc.callbackUrl || '';
+		}
+
+		// Postgres auth
+		if (options.features.postgres && options.config.postgres) {
+			postgresAuth.value.enabled = options.config.postgres.enabled;
+		}
+
+		// XSUAA auth
+		if (options.features.xsuaa && options.config.xsuaa) {
+			xsuaaAuth.value.enabled = options.config.xsuaa.enabled;
+			xsuaaAuth.value.loginUrl = options.config.xsuaa.loginUrl;
 		}
 	};
 
@@ -236,5 +263,10 @@ export const useSSOStore = defineStore('sso', () => {
 		testLdapConnection,
 		updateLdapConfig,
 		runLdapSync,
+
+		postgresAuth,
+		isPostgresAuthEnabled,
+		xsuaaAuth,
+		isXSUAAEnabled,
 	};
 });

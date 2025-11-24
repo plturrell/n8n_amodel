@@ -1,0 +1,131 @@
+{
+  "name": "TOOM Configuration Approval",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [160, 220]
+    },
+    {
+      "parameters": {
+        "configPath": "git://config/toom/rules.yaml",
+        "environment": "staging"
+      },
+      "id": "validate-toom",
+      "name": "Validate TOOM Config",
+      "type": "n8n-nodes-amodels.validateToomConfig",
+      "typeVersion": 1,
+      "position": [420, 220],
+      "credentials": {
+        "aModelsApi": "amodelsApi"
+      }
+    },
+    {
+      "parameters": {
+        "approvalText": "Deploy TOOM changes to production?",
+        "options": {
+          "assigneeType": "user"
+        }
+      },
+      "id": "manual-approval",
+      "name": "Manual Approval",
+      "type": "n8n-nodes-base.approval",
+      "typeVersion": 1,
+      "position": [680, 220]
+    },
+    {
+      "parameters": {
+        "url": "https://orchestration/api/toom/config/apply",
+        "method": "POST",
+        "jsonParameters": true,
+        "sendBody": true,
+        "bodyParametersJson": "={ {\n  \"environment\": \"production\",\n  \"configSha\": $json[\"configSha\"],\n  \"requestedBy\": $json[\"requestedBy\"]\n} }"
+      },
+      "id": "apply-config",
+      "name": "Apply Config",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [940, 220],
+      "credentials": {
+        "httpHeaderAuth": "amodelsApi"
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://telemetry-exporter/api/events",
+        "method": "POST",
+        "jsonParameters": true,
+        "sendBody": true,
+        "bodyParametersJson": "={ {\n  \"event\": \"toom-config-apply\",\n  \"configSha\": $json[\"configSha\"],\n  \"status\": $json[\"status\"],\n  \"approver\": $json[\"approver\"]\n} }"
+      },
+      "id": "telemetry",
+      "name": "Telemetry Event",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [1200, 220],
+      "credentials": {
+        "httpBasicAuth": "telemetryApi"
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Validate TOOM Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate TOOM Config": {
+      "main": [
+        [
+          {
+            "node": "Manual Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Approval": {
+      "main": [
+        [
+          {
+            "node": "Apply Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply Config": {
+      "main": [
+        [
+          {
+            "node": "Telemetry Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "saveManualExecutions": true,
+    "executionOrder": "v1"
+  },
+  "tags": ["toom", "approval"],
+  "versionId": "tmpl-toom-config-approval",
+  "meta": {
+    "templateVersion": "1.0.0",
+    "description": "Validates TOOM config changes and routes them through approval."
+  }
+}
+

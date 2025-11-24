@@ -90,6 +90,33 @@ const INVALID_JWT_REFRESH_TIMEOUT_WARNING =
 	'N8N_USER_MANAGEMENT_JWT_REFRESH_TIMEOUT_HOURS needs to be smaller than N8N_USER_MANAGEMENT_JWT_DURATION_HOURS. Setting N8N_USER_MANAGEMENT_JWT_REFRESH_TIMEOUT_HOURS to 0.';
 
 @Config
+class PostgresAuthConfig {
+	/** Whether to enable Postgres-based authentication */
+	@Env('N8N_POSTGRES_AUTH_ENABLED')
+	enabled: boolean = false;
+
+	/** Postgres connection string (DSN) for authentication */
+	@Env('N8N_POSTGRES_AUTH_DSN')
+	dsn: string = '';
+
+	/** User table name in Postgres */
+	@Env('N8N_POSTGRES_AUTH_TABLE')
+	table: string = 'users';
+
+	/** Email column name in user table */
+	@Env('N8N_POSTGRES_AUTH_EMAIL_COLUMN')
+	emailColumn: string = 'email';
+
+	/** Password hash column name in user table */
+	@Env('N8N_POSTGRES_AUTH_PASSWORD_COLUMN')
+	passwordColumn: string = 'password_hash';
+
+	/** Role mapping from Postgres roles to n8n roles (JSON string: {"pg_role": "n8n_role"}) */
+	@Env('N8N_POSTGRES_AUTH_ROLE_MAPPING')
+	roleMapping: string = '{}';
+}
+
+@Config
 export class UserManagementConfig {
 	@Nested
 	emails: EmailConfig;
@@ -119,6 +146,9 @@ export class UserManagementConfig {
 	 */
 	@Env('N8N_USER_MANAGEMENT_JWT_REFRESH_TIMEOUT_HOURS')
 	jwtRefreshTimeoutHours: number = 0;
+
+	@Nested
+	postgresAuth: PostgresAuthConfig;
 
 	sanitize() {
 		if (this.jwtRefreshTimeoutHours >= this.jwtSessionDurationHours) {

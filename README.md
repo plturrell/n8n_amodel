@@ -31,6 +31,12 @@ docker run -it --rm --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n docker.n
 
 Access the editor at http://localhost:5678
 
+## aModels Additions
+
+- **Custom Nodes**: The `packages/@n8n/nodes-amodels` workspace ships LNN/GNN training, LocalAI deployment, TOOM validation, and graph publishing nodes. Install or link the package and restart n8n to expose them in the editor.
+- **Workflow Templates**: Import any JSON file under `infrastructure/third_party/n8n/templates/` (see the README in that folder) to bootstrap training, LocalAI fine-tuning, TOOM approvals, and graph population flows.
+- **CI Integration**: The `publish-n8n` workflow runs lint/test/build for the custom nodes so regressions are caught before container images ship.
+
 ## Resources
 
 - 📚 [Documentation](https://docs.n8n.io)

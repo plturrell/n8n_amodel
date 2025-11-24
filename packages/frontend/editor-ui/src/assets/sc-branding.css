@@ -1,0 +1,244 @@
+/* Standard Chartered Branding for n8n */
+
+:root {
+	/* Standard Chartered Primary Colors */
+	--sc-primary-blue: #1E3A8A;
+	--sc-primary-grey: #4A4A4A;
+	--sc-accent-blue: #2563EB;
+	--sc-accent-teal: #0D9488;
+	
+	/* Standard Chartered Secondary Colors */
+	--sc-secondary-light-blue: #DBEAFE;
+	--sc-secondary-light-grey: #F3F4F6;
+	--sc-secondary-dark-grey: #1F2937;
+	
+	/* Standard Chartered Text Colors */
+	--sc-text-primary: #111827;
+	--sc-text-secondary: #6B7280;
+	--sc-text-tertiary: #9CA3AF;
+	
+	/* Standard Chartered Background Colors */
+	--sc-bg-primary: #FFFFFF;
+	--sc-bg-secondary: #F9FAFB;
+	--sc-bg-tertiary: #F3F4F6;
+	
+	/* Standard Chartered Border Colors */
+	--sc-border-light: #E5E7EB;
+	--sc-border-medium: #D1D5DB;
+	--sc-border-dark: #9CA3AF;
+	
+	/* Standard Chartered Spacing */
+	--sc-spacing-xs: 4px;
+	--sc-spacing-sm: 8px;
+	--sc-spacing-md: 16px;
+	--sc-spacing-lg: 24px;
+	--sc-spacing-xl: 32px;
+	--sc-spacing-2xl: 48px;
+	
+	/* Standard Chartered Typography */
+	--sc-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+	--sc-font-size-xs: 12px;
+	--sc-font-size-sm: 14px;
+	--sc-font-size-base: 16px;
+	--sc-font-size-lg: 18px;
+	--sc-font-size-xl: 20px;
+	--sc-font-size-2xl: 24px;
+	--sc-font-size-3xl: 30px;
+	
+	/* Standard Chartered Border Radius */
+	--sc-radius-sm: 4px;
+	--sc-radius-md: 8px;
+	--sc-radius-lg: 12px;
+	--sc-radius-xl: 16px;
+	
+	/* Standard Chartered Shadows */
+	--sc-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+	--sc-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	--sc-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Standard Chartered Logo Component */
+.sc-logo {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--sc-spacing-sm);
+	font-family: var(--sc-font-family);
+	font-weight: 600;
+	color: var(--sc-primary-blue);
+	font-size: var(--sc-font-size-2xl);
+	letter-spacing: -0.5px;
+}
+
+.sc-logo-large {
+	font-size: var(--sc-font-size-3xl);
+	margin-bottom: var(--sc-spacing-lg);
+}
+
+.sc-logo-text {
+	color: var(--sc-primary-blue);
+	font-weight: 700;
+}
+
+.sc-logo-subtitle {
+	color: var(--sc-text-secondary);
+	font-size: var(--sc-font-size-sm);
+	font-weight: 400;
+	margin-top: var(--sc-spacing-xs);
+}
+
+/* Standard Chartered Branded Auth Container */
+.sc-auth-container {
+	background: var(--sc-bg-primary);
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: var(--sc-spacing-xl);
+}
+
+.sc-auth-card {
+	background: var(--sc-bg-primary);
+	border: 1px solid var(--sc-border-light);
+	border-radius: var(--sc-radius-lg);
+	padding: var(--sc-spacing-2xl);
+	box-shadow: var(--sc-shadow-lg);
+	max-width: 400px;
+	width: 100%;
+}
+
+/* Standard Chartered Button Styles */
+.sc-button-primary {
+	background-color: var(--sc-primary-blue);
+	color: white;
+	border: none;
+	border-radius: var(--sc-radius-md);
+	padding: var(--sc-spacing-sm) var(--sc-spacing-lg);
+	font-size: var(--sc-font-size-base);
+	font-weight: 600;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.sc-button-primary:hover {
+	background-color: var(--sc-accent-blue);
+}
+
+.sc-button-secondary {
+	background-color: var(--sc-bg-secondary);
+	color: var(--sc-text-primary);
+	border: 1px solid var(--sc-border-medium);
+	border-radius: var(--sc-radius-md);
+	padding: var(--sc-spacing-sm) var(--sc-spacing-lg);
+	font-size: var(--sc-font-size-base);
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.sc-button-secondary:hover {
+	background-color: var(--sc-bg-tertiary);
+	border-color: var(--sc-border-dark);
+}
+
+/* Standard Chartered Input Styles */
+.sc-input {
+	width: 100%;
+	padding: var(--sc-spacing-sm) var(--sc-spacing-md);
+	border: 1px solid var(--sc-border-medium);
+	border-radius: var(--sc-radius-md);
+	font-size: var(--sc-font-size-base);
+	font-family: var(--sc-font-family);
+	color: var(--sc-text-primary);
+	background-color: var(--sc-bg-primary);
+	transition: border-color 0.2s ease;
+}
+
+.sc-input:focus {
+	outline: none;
+	border-color: var(--sc-primary-blue);
+	box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.sc-input::placeholder {
+	color: var(--sc-text-tertiary);
+}
+
+/* Standard Chartered Text Styles */
+.sc-text-primary {
+	color: var(--sc-text-primary);
+	font-family: var(--sc-font-family);
+}
+
+.sc-text-secondary {
+	color: var(--sc-text-secondary);
+	font-family: var(--sc-font-family);
+}
+
+.sc-heading {
+	color: var(--sc-text-primary);
+	font-family: var(--sc-font-family);
+	font-weight: 700;
+	margin-bottom: var(--sc-spacing-md);
+}
+
+.sc-heading-large {
+	font-size: var(--sc-font-size-2xl);
+}
+
+.sc-heading-medium {
+	font-size: var(--sc-font-size-xl);
+}
+
+/* Standard Chartered SSO Button */
+.sc-sso-button {
+	width: 100%;
+	padding: var(--sc-spacing-sm) var(--sc-spacing-md);
+	border: 1px solid var(--sc-border-medium);
+	border-radius: var(--sc-radius-md);
+	background-color: var(--sc-bg-primary);
+	color: var(--sc-text-primary);
+	font-size: var(--sc-font-size-base);
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--sc-spacing-sm);
+	margin-top: var(--sc-spacing-md);
+}
+
+.sc-sso-button:hover {
+	background-color: var(--sc-bg-secondary);
+	border-color: var(--sc-primary-blue);
+}
+
+.sc-sso-button-postgres {
+	border-color: var(--sc-primary-blue);
+	color: var(--sc-primary-blue);
+}
+
+.sc-sso-button-postgres:hover {
+	background-color: var(--sc-secondary-light-blue);
+}
+
+.sc-sso-button-xsuaa {
+	border-color: var(--sc-accent-teal);
+	color: var(--sc-accent-teal);
+}
+
+.sc-sso-button-xsuaa:hover {
+	background-color: rgba(13, 148, 136, 0.1);
+}
+
+/* Override n8n default colors with SC colors */
+body {
+	--color-primary: var(--sc-primary-blue);
+	--color-primary-hover: var(--sc-accent-blue);
+	--color-text-base: var(--sc-text-primary);
+	--color-text-light: var(--sc-text-secondary);
+	--color-background-base: var(--sc-bg-primary);
+	--color-background-light: var(--sc-bg-secondary);
+}
+

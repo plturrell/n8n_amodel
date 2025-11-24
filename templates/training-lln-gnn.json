@@ -1,0 +1,121 @@
+{
+  "name": "LNN/GNN Training Orchestration",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": [
+          {
+            "mode": "everyDay",
+            "hour": 1
+          }
+        ]
+      },
+      "id": "cron-training",
+      "name": "Training Schedule",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "datasetId": "DATASET_LNN_DEFAULT",
+        "hyperparametersJson": "{\n  \"learning_rate\": 0.001,\n  \"epochs\": 25\n}",
+        "notes": "Override dataset/hyperparameters in staging."
+      },
+      "id": "submit-lnn",
+      "name": "Submit LNN Training",
+      "type": "n8n-nodes-amodels.submitLnnTraining",
+      "typeVersion": 1,
+      "position": [520, 180],
+      "credentials": {
+        "aModelsApi": "amodelsApi"
+      }
+    },
+    {
+      "parameters": {
+        "datasetId": "DATASET_GNN_DEFAULT",
+        "hyperparametersJson": "{\n  \"learning_rate\": 0.0005,\n  \"layers\": 8\n}",
+        "notes": "Tune per topology update."
+      },
+      "id": "submit-gnn",
+      "name": "Submit GNN Training",
+      "type": "n8n-nodes-amodels.submitGnnTraining",
+      "typeVersion": 1,
+      "position": [520, 420],
+      "credentials": {
+        "aModelsApi": "amodelsApi"
+      }
+    },
+    {
+      "id": "telemetry",
+      "name": "Telemetry Event",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [840, 300],
+      "parameters": {
+        "url": "https://telemetry-exporter/api/events",
+        "method": "POST",
+        "options": {},
+        "responseFormat": "json",
+        "jsonParameters": true,
+        "sendBody": true,
+        "bodyParametersJson": "={{$json}}"
+      },
+      "credentials": {
+        "httpBasicAuth": "telemetryApi"
+      }
+    }
+  ],
+  "connections": {
+    "Training Schedule": {
+      "main": [
+        [
+          {
+            "node": "Submit LNN Training",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Submit GNN Training",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submit LNN Training": {
+      "main": [
+        [
+          {
+            "node": "Telemetry Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submit GNN Training": {
+      "main": [
+        [
+          {
+            "node": "Telemetry Event",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "executionOrder": "v1"
+  },
+  "tags": ["training", "lnn", "gnn"],
+  "versionId": "tmpl-training-lln-gnn",
+  "meta": {
+    "templateVersion": "1.0.0",
+    "description": "Schedules LNN and GNN training jobs and emits telemetry."
+  }
+}
+

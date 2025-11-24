@@ -4,6 +4,7 @@ import SSOLogin from '@/features/settings/sso/components/SSOLogin.vue';
 import type { FormFieldValueUpdate, IFormBoxConfig } from '@/Interface';
 import { useSettingsStore } from '@/app/stores/settings.store';
 import type { EmailOrLdapLoginIdAndPassword } from './SigninView.vue';
+import '@/assets/sc-branding.css';
 
 import { N8nFormBox, N8nText } from '@n8n/design-system';
 withDefaults(
@@ -44,7 +45,13 @@ const {
 
 <template>
 	<div :class="$style.container">
-		<N8nLogo size="large" :release-channel="releaseChannel" />
+		<!-- Standard Chartered Branding -->
+		<div class="sc-logo sc-logo-large">
+			<span class="sc-logo-text">Standard Chartered</span>
+		</div>
+		<div class="sc-logo-subtitle" style="text-align: center; margin-bottom: 24px;">
+			Workflow Automation Platform
+		</div>
 		<div v-if="subtitle" :class="$style.textContainer">
 			<N8nText size="large">{{ subtitle }}</N8nText>
 		</div>
