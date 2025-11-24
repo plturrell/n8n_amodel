@@ -126,7 +126,7 @@ export class ModelInferenceNode implements INodeType {
                 try {
                     inputData = typeof inputDataStr === 'string' ? JSON.parse(inputDataStr) : inputDataStr;
                 } catch (error) {
-                    throw new Error(`Invalid JSON in input data: ${error.message}`);
+                    throw new Error(`Invalid JSON in input data: ${(error as Error).message}`);
                 }
 
                 // Build request payload
@@ -167,13 +167,13 @@ export class ModelInferenceNode implements INodeType {
                 if (this.continueOnFail()) {
                     returnData.push({
                         json: {
-                            error: error.message,
+                            error: (error as Error).message,
                         },
                         pairedItem: { item: i },
                     });
                     continue;
                 }
-                throw new NodeOperationError(this.getNode(), error.message, { itemIndex: i });
+                throw new NodeOperationError(this.getNode(), (error as Error).message, { itemIndex: i });
             }
         }
 

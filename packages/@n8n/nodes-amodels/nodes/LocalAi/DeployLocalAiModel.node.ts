@@ -67,7 +67,7 @@ export class DeployLocalAiModel implements INodeType {
                 displayName: 'Metadata (JSON)',
                 name: 'metadataJson',
                 type: 'json',
-                default: '{\n  \"owner\": \"ml-team\"\n}',
+                default: '{\n  "owner": "ml-team"\n}',
             },
         ],
     };

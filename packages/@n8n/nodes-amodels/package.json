@@ -13,7 +13,7 @@
     },
     "main": "index.js",
     "scripts": {
-        "build": "tsc && gulp build:icons",
+        "build": "tsc",
         "dev": "tsc --watch",
         "format": "prettier nodes --write",
         "lint": "eslint nodes --ext .ts",

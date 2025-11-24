@@ -46,7 +46,7 @@ export class PublishToGraph implements INodeType {
                 displayName: 'Payload JSON',
                 name: 'payloadJson',
                 type: 'json',
-                default: '{\n  \"batchId\": \"batch-123\",\n  \"nodes\": [],\n  \"relationships\": []\n}',
+                default: '{\n  "batchId": "batch-123",\n  "nodes": [],\n  "relationships": []\n}',
                 required: true,
                 description: 'Extraction payload produced by the extract service',
             },

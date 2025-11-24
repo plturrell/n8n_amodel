@@ -11,14 +11,18 @@ export const createExecuteContext = (
         getInputData() {
             return parametersPerItem.map(() => ({ json: {} }));
         },
-        getNodeParameter(parameterName: string, itemIndex: number) {
-            return parametersPerItem[itemIndex][parameterName];
+        getNodeParameter<T = unknown>(parameterName: string, itemIndex?: number): T {
+            const idx = itemIndex ?? 0;
+            return parametersPerItem[idx][parameterName] as T;
         },
-        async getCredentials() {
+        async getCredentials<T extends object = Record<string, unknown>>(
+            type?: string,
+            itemIndex?: number,
+        ): Promise<T> {
             return {
                 gatewayUrl: 'https://gateway.local',
                 apiKey: 'test-key',
-            };
+            } as T;
         },
         continueOnFail() {
             return false;

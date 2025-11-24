@@ -268,13 +268,13 @@ export class OCRNode implements INodeType {
                 if (this.continueOnFail()) {
                     returnData.push({
                         json: {
-                            error: error.message,
+                            error: (error as Error).message,
                         },
                         pairedItem: { item: i },
                     });
                     continue;
                 }
-                throw new NodeOperationError(this.getNode(), error.message, { itemIndex: i });
+                throw new NodeOperationError(this.getNode(), (error as Error).message, { itemIndex: i });
             }
         }
 
