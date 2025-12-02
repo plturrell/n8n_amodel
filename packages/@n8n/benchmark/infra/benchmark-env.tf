@@ -49,6 +49,7 @@ module "test_vm" {
   dedicated_host_id   = azurerm_dedicated_host.hosts.id
   ssh_public_key      = tls_private_key.ssh_key.public_key_openssh
   vm_size             = var.vm_size
+  allowed_admin_cidrs = var.allowed_admin_cidrs
 
   tags = local.common_tags
 }

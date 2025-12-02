@@ -1,0 +1,225 @@
+{
+    "name": "Model Deployment Pipeline",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "manual-trigger",
+            "name": "Manual Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "datasetId": "dataset-123",
+                "topologyTag": "lnn-v1",
+                "hyperparametersJson": "{ \"epochs\": 10, \"learning_rate\": 0.001 }"
+            },
+            "id": "submit-training",
+            "name": "Submit LNN Training",
+            "type": "n8n-nodes-amodels.submitLnnTraining",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "operation": "register",
+                "modelName": "={{$json[\"jobId\"]}}",
+                "modelType": "llm",
+                "metadataJson": "={{ JSON.stringify({ jobId: $json[\"jobId\"], status: \"trained\" }) }}"
+            },
+            "id": "register-model",
+            "name": "Register Model",
+            "type": "n8n-nodes-amodels.catalog",
+            "typeVersion": 1,
+            "position": [
+                500,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "baseModel": "llama3.1:8b",
+                "datasetPath": "s3://models/{{$json[\"modelId\"]}}",
+                "deploymentChannel": "staging"
+            },
+            "id": "deploy-staging",
+            "name": "Deploy to Staging",
+            "type": "n8n-nodes-amodels.deployLocalAiModel",
+            "typeVersion": 1,
+            "position": [
+                700,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "modelId": "={{$json[\"deploymentId\"]}}",
+                "inputData": "{ \"prompt\": \"Test query\" }"
+            },
+            "id": "validate-model",
+            "name": "Validate Model",
+            "type": "n8n-nodes-amodels.modelInference",
+            "typeVersion": 1,
+            "position": [
+                900,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {},
+            "id": "wait-approval",
+            "name": "Wait for Approval",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                1100,
+                300
+            ],
+            "webhookId": "approval-webhook"
+        },
+        {
+            "parameters": {
+                "baseModel": "llama3.1:8b",
+                "datasetPath": "s3://models/{{$node[\"Register Model\"].json[\"modelId\"]}}",
+                "deploymentChannel": "production",
+                "autoPromote": true
+            },
+            "id": "deploy-production",
+            "name": "Deploy to Production",
+            "type": "n8n-nodes-amodels.deployLocalAiModel",
+            "typeVersion": 1,
+            "position": [
+                1300,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "modelId": "={{$node[\"Register Model\"].json[\"modelId\"]}}",
+                "metadataJson": "{ \"status\": \"production\", \"deployedAt\": \"{{new Date().toISOString()}}\" }"
+            },
+            "id": "update-catalog",
+            "name": "Update Catalog",
+            "type": "n8n-nodes-amodels.catalog",
+            "typeVersion": 1,
+            "position": [
+                1500,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        }
+    ],
+    "connections": {
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Submit Training",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Submit Training": {
+            "main": [
+                [
+                    {
+                        "node": "Register Model",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Register Model": {
+            "main": [
+                [
+                    {
+                        "node": "Deploy to Staging",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Deploy to Staging": {
+            "main": [
+                [
+                    {
+                        "node": "Validate Model",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Validate Model": {
+            "main": [
+                [
+                    {
+                        "node": "Wait for Approval",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Wait for Approval": {
+            "main": [
+                [
+                    {
+                        "node": "Deploy to Production",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Deploy to Production": {
+            "main": [
+                [
+                    {
+                        "node": "Update Catalog",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "tags": [
+        "mlops",
+        "deployment",
+        "localai"
+    ],
+    "versionId": "tmpl-model-deployment"
+}

@@ -1,0 +1,174 @@
+{
+    "name": "Multi-Model Inference",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "inference/multi",
+                "options": {}
+            },
+            "id": "webhook-trigger",
+            "name": "Webhook Trigger",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "modelId": "gemma-2b",
+                "inputData": "={{JSON.stringify($json[\"body\"])}}"
+            },
+            "id": "gemma-inference",
+            "name": "Gemma Inference",
+            "type": "n8n-nodes-amodels.modelInference",
+            "typeVersion": 1,
+            "position": [
+                300,
+                100
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "modelId": "granite-4.0-h-micro",
+                "inputData": "={{JSON.stringify($json[\"body\"])}}"
+            },
+            "id": "granite-inference",
+            "name": "Granite Inference",
+            "type": "n8n-nodes-amodels.modelInference",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "modelId": "phi-3.5-mini",
+                "inputData": "={{JSON.stringify($json[\"body\"])}}"
+            },
+            "id": "phi-inference",
+            "name": "Phi-3.5 Inference",
+            "type": "n8n-nodes-amodels.modelInference",
+            "typeVersion": 1,
+            "position": [
+                300,
+                500
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "mode": "mergeByIndex",
+                "join": "outer"
+            },
+            "id": "merge-results",
+            "name": "Merge Results",
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 1,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "functionCode": "const gemma = items[0].json;\nconst granite = items[1].json;\nconst phi = items[2].json;\n\n// Simple logic to pick best result (e.g. longest response)\nconst results = [\n  { model: 'gemma', text: gemma.output.text },\n  { model: 'granite', text: granite.output.text },\n  { model: 'phi', text: phi.output.text }\n];\n\nresults.sort((a, b) => b.text.length - a.text.length);\n\nreturn [{ json: { best_model: results[0].model, result: results[0].text, all_results: results } }];"
+            },
+            "id": "compare-results",
+            "name": "Compare Results",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                700,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Gemma Inference",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Granite Inference",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Phi-3.5 Inference",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Gemma Inference": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Results",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Granite Inference": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Results",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "Phi-3.5 Inference": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Results",
+                        "type": "main",
+                        "index": 2
+                    }
+                ]
+            ]
+        },
+        "Merge Results": {
+            "main": [
+                [
+                    {
+                        "node": "Compare Results",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "tags": [
+        "inference",
+        "multi-model",
+        "comparison"
+    ],
+    "versionId": "tmpl-multi-model-inference"
+}

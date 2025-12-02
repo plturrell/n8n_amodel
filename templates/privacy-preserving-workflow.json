@@ -1,0 +1,122 @@
+{
+    "name": "Privacy-Preserving Workflow",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "privacy/process",
+                "options": {}
+            },
+            "id": "secure-webhook",
+            "name": "Secure Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "modelId": "vaultgemma-1b",
+                "inputData": "={{JSON.stringify({ prompt: $json[\"body\"][\"prompt\"], privacy_budget: 0.5 })}}",
+                "additionalOptions": {
+                    "returnProbabilities": false
+                }
+            },
+            "id": "vaultgemma-inference",
+            "name": "VaultGemma Inference (DP)",
+            "type": "n8n-nodes-amodels.modelInference",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "operation": "log",
+                "message": "Privacy-preserving inference executed",
+                "level": "info",
+                "context": "={{JSON.stringify({ requestId: $node[\"Secure Webhook\"].json[\"body\"][\"requestId\"], model: \"vaultgemma-1b\", privacy_budget_used: 0.5 })}}"
+            },
+            "id": "audit-log",
+            "name": "Audit Log",
+            "type": "n8n-nodes-amodels.telemetry",
+            "typeVersion": 1,
+            "position": [
+                500,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "operation": "metric",
+                "metricName": "privacy_budget_consumed",
+                "value": 0.5,
+                "tags": "{\"model\": \"vaultgemma-1b\"}"
+            },
+            "id": "privacy-metric",
+            "name": "Privacy Metric",
+            "type": "n8n-nodes-amodels.telemetry",
+            "typeVersion": 1,
+            "position": [
+                700,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        }
+    ],
+    "connections": {
+        "Secure Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "VaultGemma Inference (DP)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "VaultGemma Inference (DP)": {
+            "main": [
+                [
+                    {
+                        "node": "Audit Log",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Audit Log": {
+            "main": [
+                [
+                    {
+                        "node": "Privacy Metric",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "tags": [
+        "privacy",
+        "dp",
+        "vaultgemma"
+    ],
+    "versionId": "tmpl-privacy-workflow"
+}

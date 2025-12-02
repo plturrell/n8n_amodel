@@ -107,6 +107,74 @@ General-purpose node for calling aModels Gateway API endpoints.
 - API testing
 - Data synchronization
 
+## Model Catalog Node
+Interact with the aModels Model Catalog service.
+
+**Features:**
+- List, get, register, update, and delete models
+- Manage model metadata
+- Support for various model types (LLM, Vision, etc.)
+
+## Research Suite Node
+Automate research workflows using the Research Suite services.
+
+**Features:**
+- Generate search queries from topics
+- Execute parallel searches
+- Synthesize results with LLMs
+- Analyze tabular data
+- Generate narrative reports
+
+## Browser Automation Node
+Automate browser interactions via the Browser Service.
+
+**Features:**
+- Navigate to URLs
+- Click elements and fill forms
+- Take screenshots (viewport or full page)
+- Extract data via selectors
+- Execute custom JavaScript
+
+## Telemetry Node
+Send observability data to the aModels Telemetry service.
+
+**Features:**
+- Track discrete events with properties
+- Record numerical metrics with tags
+- Send structured logs with context
+
+## Search Node
+Interact with the aModels Search Service.
+
+**Features:**
+- Index documents with metadata
+- Execute search queries
+- Delete documents and reindex
+
+## GPU Orchestrator Node
+Manage GPU jobs via the GPU Orchestrator.
+
+**Features:**
+- Submit training/inference jobs
+- Check job status and logs
+- Cancel running jobs
+
+## SAP Integration Node
+Interact with SAP systems via the aModels Gateway.
+
+**Features:**
+- Execute RFCs
+- Send IDocs
+- Query OData services
+
+## Regulatory Compliance Node
+Ensure compliance with regulatory standards.
+
+**Features:**
+- Check against regulations (GDPR, HIPAA, etc.)
+- Scan text for PII
+- Log audit events
+
 ## Installation
 
 ### Option 1: Install from npm (when published)

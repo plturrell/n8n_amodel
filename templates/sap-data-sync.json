@@ -1,0 +1,148 @@
+{
+    "name": "SAP Data Sync",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "hours",
+                            "hoursInterval": 24
+                        }
+                    ]
+                }
+            },
+            "id": "schedule-trigger",
+            "name": "Schedule Trigger",
+            "type": "n8n-nodes-base.schedule",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "rfc",
+                "functionName": "BAPI_MATERIAL_GETLIST",
+                "parameters": "{\"MAXROWS\": 100}"
+            },
+            "id": "fetch-materials",
+            "name": "Fetch SAP Materials",
+            "type": "n8n-nodes-amodels.sap",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "MATNRLIST"
+            },
+            "id": "split-items",
+            "name": "Split Items",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 1,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "register",
+                "modelName": "={{$json[\"MATERIAL_DESC\"]}}",
+                "modelType": "product-embedding",
+                "metadataJson": "={{JSON.stringify({ sapId: $json[\"MATERIAL\"], type: $json[\"MATL_TYPE\"] })}}"
+            },
+            "id": "update-catalog",
+            "name": "Update Catalog",
+            "type": "n8n-nodes-amodels.catalog",
+            "typeVersion": 1,
+            "position": [
+                700,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "operation": "event",
+                "eventName": "sap_sync_completed",
+                "properties": "={{JSON.stringify({ count: $items().length })}}"
+            },
+            "id": "log-success",
+            "name": "Log Success",
+            "type": "n8n-nodes-amodels.telemetry",
+            "typeVersion": 1,
+            "position": [
+                900,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        }
+    ],
+    "connections": {
+        "Schedule Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Fetch SAP Materials",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fetch SAP Materials": {
+            "main": [
+                [
+                    {
+                        "node": "Split Items",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Split Items": {
+            "main": [
+                [
+                    {
+                        "node": "Update Catalog",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Update Catalog": {
+            "main": [
+                [
+                    {
+                        "node": "Log Success",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "tags": [
+        "sap",
+        "sync",
+        "catalog"
+    ],
+    "versionId": "tmpl-sap-data-sync"
+}

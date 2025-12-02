@@ -1,0 +1,236 @@
+{
+    "name": "Health Monitoring",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "minutes",
+                            "minutesInterval": 5
+                        }
+                    ]
+                }
+            },
+            "id": "schedule-trigger",
+            "name": "Schedule Trigger",
+            "type": "n8n-nodes-base.schedule",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "http://localai-service:8080/health",
+                "options": {}
+            },
+            "id": "check-localai",
+            "name": "Check LocalAI",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                300,
+                100
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "list"
+            },
+            "id": "check-gpu",
+            "name": "Check GPU Orchestrator",
+            "type": "n8n-nodes-amodels.gpuOrchestrator",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "operation": "stats"
+            },
+            "id": "check-search",
+            "name": "Check Search",
+            "type": "n8n-nodes-amodels.search",
+            "typeVersion": 1,
+            "position": [
+                300,
+                500
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "mode": "mergeByIndex",
+                "join": "outer"
+            },
+            "id": "merge-checks",
+            "name": "Merge Checks",
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 1,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "boolean": [
+                        {
+                            "value1": "={{$json[\"error\"] ? true : false}}",
+                            "value2": true
+                        }
+                    ]
+                }
+            },
+            "id": "check-failures",
+            "name": "Check Failures",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                700,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "event",
+                "eventName": "health_check_failed",
+                "properties": "={{JSON.stringify({ error: $json[\"error\"], service: $json[\"operation\"] })}}"
+            },
+            "id": "alert-failure",
+            "name": "Alert Failure",
+            "type": "n8n-nodes-amodels.telemetry",
+            "typeVersion": 1,
+            "position": [
+                900,
+                200
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "operation": "metric",
+                "metricName": "system_health",
+                "value": 1,
+                "tags": "{\"status\": \"healthy\"}"
+            },
+            "id": "log-success",
+            "name": "Log Success",
+            "type": "n8n-nodes-amodels.telemetry",
+            "typeVersion": 1,
+            "position": [
+                900,
+                400
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        }
+    ],
+    "connections": {
+        "Schedule Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Check LocalAI",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Check GPU Orchestrator",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Check Search",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check LocalAI": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Checks",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check GPU Orchestrator": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Checks",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "Check Search": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Checks",
+                        "type": "main",
+                        "index": 2
+                    }
+                ]
+            ]
+        },
+        "Merge Checks": {
+            "main": [
+                [
+                    {
+                        "node": "Check Failures",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check Failures": {
+            "main": [
+                [
+                    {
+                        "node": "Alert Failure",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Log Success",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "tags": [
+        "monitoring",
+        "health",
+        "ops"
+    ],
+    "versionId": "tmpl-health-monitoring"
+}

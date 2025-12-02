@@ -27,3 +27,8 @@ variable "tags" {
   description = "Tags to apply to all resources created by this module"
   type        = map(string)
 }
+
+variable "allowed_admin_cidrs" {
+  description = "List of CIDR blocks that are permitted to reach administrative endpoints such as SSH"
+  type        = list(string)
+}

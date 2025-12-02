@@ -1,0 +1,168 @@
+{
+    "name": "Batch Processing",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "batch/process",
+                "options": {}
+            },
+            "id": "webhook-trigger",
+            "name": "Webhook Trigger",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "items"
+            },
+            "id": "split-items",
+            "name": "Split Items",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "scanPii",
+                "text": "={{$json[\"content\"]}}"
+            },
+            "id": "scan-pii",
+            "name": "Scan PII",
+            "type": "n8n-nodes-amodels.regulatoryCompliance",
+            "typeVersion": 1,
+            "position": [
+                500,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "boolean": [
+                        {
+                            "value1": "={{$json[\"hasPii\"]}}",
+                            "value2": true
+                        }
+                    ]
+                }
+            },
+            "id": "check-pii",
+            "name": "Check PII",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                700,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "audit",
+                "eventType": "pii_detected",
+                "details": "={{JSON.stringify({ itemId: $json[\"id\"], piiTypes: $json[\"piiTypes\"] })}}"
+            },
+            "id": "audit-pii",
+            "name": "Audit PII",
+            "type": "n8n-nodes-amodels.regulatoryCompliance",
+            "typeVersion": 1,
+            "position": [
+                900,
+                200
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "operation": "event",
+                "eventName": "item_processed",
+                "properties": "={{JSON.stringify({ itemId: $json[\"id\"], status: \"safe\" })}}"
+            },
+            "id": "log-safe",
+            "name": "Log Safe",
+            "type": "n8n-nodes-amodels.telemetry",
+            "typeVersion": 1,
+            "position": [
+                900,
+                400
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        }
+    ],
+    "connections": {
+        "Webhook Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Split Items",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Split Items": {
+            "main": [
+                [
+                    {
+                        "node": "Scan PII",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Scan PII": {
+            "main": [
+                [
+                    {
+                        "node": "Check PII",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check PII": {
+            "main": [
+                [
+                    {
+                        "node": "Audit PII",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Log Safe",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "tags": [
+        "batch",
+        "compliance",
+        "pii"
+    ],
+    "versionId": "tmpl-batch-processing"
+}

@@ -39,7 +39,15 @@
             "dist/nodes/Training/SubmitGnnTraining.node.js",
             "dist/nodes/LocalAi/DeployLocalAiModel.node.js",
             "dist/nodes/Graph/PublishToGraph.node.js",
-            "dist/nodes/Toom/ValidateToomConfig.node.js"
+            "dist/nodes/Toom/ValidateToomConfig.node.js",
+            "dist/nodes/Catalog/Catalog.node.js",
+            "dist/nodes/ResearchSuite/ResearchSuite.node.js",
+            "dist/nodes/Browser/Browser.node.js",
+            "dist/nodes/Telemetry/Telemetry.node.js",
+            "dist/nodes/Search/Search.node.js",
+            "dist/nodes/GPUOrchestrator/GPUOrchestrator.node.js",
+            "dist/nodes/SAP/SAP.node.js",
+            "dist/nodes/RegulatoryCompliance/RegulatoryCompliance.node.js"
         ]
     },
     "devDependencies": {

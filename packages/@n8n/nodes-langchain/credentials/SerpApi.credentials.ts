@@ -35,7 +35,7 @@ export class SerpApi implements ICredentialType {
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: 'https://serpapi.com',
-			url: '/account.json ',
+			url: '/account.json',
 		},
 	};
 }

@@ -1,10 +1,23 @@
 # Network
 
+resource "azurerm_network_ddos_protection_plan" "main" {
+  name                = "${var.prefix}-ddos-plan"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+
+  tags = var.tags
+}
+
 resource "azurerm_virtual_network" "main" {
   name                = "${var.prefix}-vnet"
   location            = var.location
   resource_group_name = var.resource_group_name
   address_space       = ["10.0.0.0/16"]
+
+  ddos_protection_plan {
+    id     = azurerm_network_ddos_protection_plan.main.id
+    enable = true
+  }
 
   tags = var.tags
 }
@@ -29,6 +42,18 @@ resource "azurerm_network_security_group" "ssh" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "22"
+    source_address_prefixes    = var.allowed_admin_cidrs
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "DenyRDPFromInternet"
+    priority                   = 1000
+    direction                  = "Inbound"
+    access                     = "Deny"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "3389"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }

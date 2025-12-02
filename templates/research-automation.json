@@ -1,0 +1,145 @@
+{
+    "name": "Research Automation",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "research/start",
+                "options": {}
+            },
+            "id": "webhook-trigger",
+            "name": "Webhook Trigger",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "generateQuery",
+                "topic": "={{$json[\"body\"][\"topic\"]}}"
+            },
+            "id": "generate-query",
+            "name": "Generate Query",
+            "type": "n8n-nodes-amodels.researchSuite",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "operation": "search",
+                "queries": "={{JSON.stringify($json[\"queries\"])}}"
+            },
+            "id": "execute-search",
+            "name": "Execute Search",
+            "type": "n8n-nodes-amodels.researchSuite",
+            "typeVersion": 1,
+            "position": [
+                500,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "operation": "synthesize",
+                "searchResults": "={{JSON.stringify($json[\"results\"])}}",
+                "synthesisPrompt": "Summarize the key findings and trends."
+            },
+            "id": "synthesize",
+            "name": "Synthesize Results",
+            "type": "n8n-nodes-amodels.researchSuite",
+            "typeVersion": 1,
+            "position": [
+                700,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "operation": "generateNarrative",
+                "context": "={{JSON.stringify($json[\"synthesis\"])}}",
+                "narrativeType": "report"
+            },
+            "id": "generate-narrative",
+            "name": "Generate Narrative",
+            "type": "n8n-nodes-amodels.researchSuite",
+            "typeVersion": 1,
+            "position": [
+                900,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        }
+    ],
+    "connections": {
+        "Webhook Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Generate Query",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generate Query": {
+            "main": [
+                [
+                    {
+                        "node": "Execute Search",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Execute Search": {
+            "main": [
+                [
+                    {
+                        "node": "Synthesize Results",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Synthesize Results": {
+            "main": [
+                [
+                    {
+                        "node": "Generate Narrative",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "tags": [
+        "research",
+        "automation",
+        "ai"
+    ],
+    "versionId": "tmpl-research-automation"
+}

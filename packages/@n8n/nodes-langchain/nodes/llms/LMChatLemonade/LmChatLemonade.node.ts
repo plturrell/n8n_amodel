@@ -15,6 +15,10 @@ import { lemonadeModel, lemonadeOptions, lemonadeDescription } from '../LMLemona
 import { makeN8nLlmFailedAttemptHandler } from '../n8nLlmFailedAttemptHandler';
 import { N8nLlmTracing } from '../N8nLlmTracing';
 
+// Non-secret placeholder for OpenAI client initialization when API key is optional
+// Actual authentication happens via Authorization header in configuration
+const OPTIONAL_API_KEY_PLACEHOLDER = 'not-used-for-auth';
+
 export class LmChatLemonade implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Lemonade Chat Model',
@@ -89,20 +93,25 @@ export class LmChatLemonade implements INodeType {
 			processedOptions.stop = stopSequences.length > 0 ? stopSequences : undefined;
 		}
 
+		// OpenAI client requires a non-empty apiKey, but Lemonade API key is optional.
+		// Use placeholder since actual auth happens via Authorization header.
+		// The apiKey parameter is only used for client initialization, not authentication.
+		const apiKey = credentials.apiKey?.trim() || OPTIONAL_API_KEY_PLACEHOLDER;
+
 		// Build configuration object like official OpenAI node
 		const configuration: any = {
 			baseURL: credentials.baseUrl,
 		};
 
 		// Add custom headers if API key is provided
-		if (credentials.apiKey) {
+		if (credentials.apiKey?.trim()) {
 			configuration.defaultHeaders = {
-				Authorization: `Bearer ${credentials.apiKey}`,
+				Authorization: `Bearer ${credentials.apiKey.trim()}`,
 			};
 		}
 
 		const model = new ChatOpenAI({
-			apiKey: credentials.apiKey || 'lemonade-placeholder-key',
+			apiKey,
 			model: modelName,
 			...processedOptions,
 			configuration,

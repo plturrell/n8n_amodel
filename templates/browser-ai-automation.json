@@ -1,0 +1,144 @@
+{
+    "name": "Browser AI Automation",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "browser/automate",
+                "options": {}
+            },
+            "id": "webhook-trigger",
+            "name": "Webhook Trigger",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "navigate",
+                "url": "={{$json[\"body\"][\"url\"]}}"
+            },
+            "id": "navigate-page",
+            "name": "Navigate Page",
+            "type": "n8n-nodes-amodels.browser",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "operation": "extract",
+                "selector": "={{$json[\"body\"][\"selector\"]}}"
+            },
+            "id": "extract-data",
+            "name": "Extract Data",
+            "type": "n8n-nodes-amodels.browser",
+            "typeVersion": 1,
+            "position": [
+                500,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "operation": "screenshot",
+                "fullPage": true
+            },
+            "id": "take-screenshot",
+            "name": "Take Screenshot",
+            "type": "n8n-nodes-amodels.browser",
+            "typeVersion": 1,
+            "position": [
+                700,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "operation": "event",
+                "eventName": "browser_automation_completed",
+                "properties": "={{JSON.stringify({ url: $node[\"Webhook Trigger\"].json[\"body\"][\"url\"], extracted: $node[\"Extract Data\"].json[\"text\"] })}}"
+            },
+            "id": "log-event",
+            "name": "Log Event",
+            "type": "n8n-nodes-amodels.telemetry",
+            "typeVersion": 1,
+            "position": [
+                900,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        }
+    ],
+    "connections": {
+        "Webhook Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Navigate Page",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Navigate Page": {
+            "main": [
+                [
+                    {
+                        "node": "Extract Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract Data": {
+            "main": [
+                [
+                    {
+                        "node": "Take Screenshot",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Take Screenshot": {
+            "main": [
+                [
+                    {
+                        "node": "Log Event",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "tags": [
+        "browser",
+        "automation",
+        "scraping"
+    ],
+    "versionId": "tmpl-browser-ai-automation"
+}

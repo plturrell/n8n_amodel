@@ -1,0 +1,147 @@
+{
+    "name": "Catalog Sync & Update",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "hours",
+                            "hoursInterval": 1
+                        }
+                    ]
+                }
+            },
+            "id": "schedule-trigger",
+            "name": "Schedule Trigger",
+            "type": "n8n-nodes-base.schedule",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "list",
+                "limit": 100
+            },
+            "id": "list-models",
+            "name": "List Models",
+            "type": "n8n-nodes-amodels.catalog",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "models"
+            },
+            "id": "split-models",
+            "name": "Split Models",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 1,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "index",
+                "docId": "={{$json[\"id\"]}}",
+                "content": "={{$json[\"description\"] || $json[\"name\"]}}",
+                "metadataJson": "={{JSON.stringify({ name: $json[\"name\"], type: $json[\"type\"], tags: $json[\"tags\"] })}}"
+            },
+            "id": "index-model",
+            "name": "Index Model",
+            "type": "n8n-nodes-amodels.search",
+            "typeVersion": 1,
+            "position": [
+                700,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "operation": "event",
+                "eventName": "catalog_synced",
+                "properties": "={{JSON.stringify({ count: $items().length })}}"
+            },
+            "id": "log-sync",
+            "name": "Log Sync",
+            "type": "n8n-nodes-amodels.telemetry",
+            "typeVersion": 1,
+            "position": [
+                900,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        }
+    ],
+    "connections": {
+        "Schedule Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "List Models",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "List Models": {
+            "main": [
+                [
+                    {
+                        "node": "Split Models",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Split Models": {
+            "main": [
+                [
+                    {
+                        "node": "Index Model",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Index Model": {
+            "main": [
+                [
+                    {
+                        "node": "Log Sync",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "tags": [
+        "catalog",
+        "sync",
+        "search"
+    ],
+    "versionId": "tmpl-catalog-sync"
+}

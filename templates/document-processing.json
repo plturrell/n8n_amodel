@@ -1,0 +1,185 @@
+{
+    "name": "Document Processing Pipeline",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "documents/process",
+                "options": {}
+            },
+            "id": "webhook-trigger",
+            "name": "Webhook Trigger",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "extractText",
+                "inputType": "url",
+                "url": "={{$json[\"body\"][\"url\"]}}",
+                "language": "auto"
+            },
+            "id": "ocr-extraction",
+            "name": "OCR Extraction",
+            "type": "n8n-nodes-amodels.ocr",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{$json[\"language\"]}}",
+                            "operation": "notEqual",
+                            "value2": "en"
+                        }
+                    ]
+                }
+            },
+            "id": "check-language",
+            "name": "Check Language",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                500,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "text": "={{$json[\"text\"]}}",
+                "targetLanguage": "en",
+                "method": "beam_search"
+            },
+            "id": "translate-text",
+            "name": "Translate Text",
+            "type": "n8n-nodes-amodels.translation",
+            "typeVersion": 1,
+            "position": [
+                700,
+                200
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "validationMode": "checksum",
+                "payloadJson": "={{JSON.stringify({ text: $json[\"text\"], metadata: $node[\"Webhook Trigger\"].json[\"body\"][\"metadata\"] })}}"
+            },
+            "id": "publish-graph",
+            "name": "Publish to Graph",
+            "type": "n8n-nodes-amodels.publishToGraph",
+            "typeVersion": 1,
+            "position": [
+                900,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        },
+        {
+            "parameters": {
+                "eventName": "document_processed",
+                "properties": "={{JSON.stringify({ documentId: $node[\"Webhook Trigger\"].json[\"body\"][\"id\"], status: \"success\" })}}"
+            },
+            "id": "telemetry-event",
+            "name": "Telemetry Event",
+            "type": "n8n-nodes-amodels.telemetry",
+            "typeVersion": 1,
+            "position": [
+                1100,
+                300
+            ],
+            "credentials": {
+                "aModelsApi": "amodelsApi"
+            }
+        }
+    ],
+    "connections": {
+        "Webhook Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "OCR Extraction",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "OCR Extraction": {
+            "main": [
+                [
+                    {
+                        "node": "Check Language",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check Language": {
+            "main": [
+                [
+                    {
+                        "node": "Translate Text",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Publish to Graph",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Translate Text": {
+            "main": [
+                [
+                    {
+                        "node": "Publish to Graph",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Publish to Graph": {
+            "main": [
+                [
+                    {
+                        "node": "Telemetry Event",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "tags": [
+        "document",
+        "ocr",
+        "pipeline"
+    ],
+    "versionId": "tmpl-document-processing"
+}

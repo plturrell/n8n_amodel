@@ -14,9 +14,14 @@ variable "host_size_family" {
 }
 
 variable "vm_size" {
-  description = "VM Size"
+  description = "Size of the VM"
   # 8 vCPUs, 32 GiB memory
-  default = "Standard_DC8_v2"
+  default     = "Standard_F4s_v2"
+}
+
+variable "allowed_admin_cidrs" {
+  description = "List of CIDR ranges permitted to reach administrative endpoints"
+  type        = list(string)
 }
 
 variable "number_of_vms" {

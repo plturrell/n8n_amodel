@@ -15,6 +15,10 @@ import { lemonadeDescription, lemonadeModel, lemonadeOptions } from './descripti
 import { makeN8nLlmFailedAttemptHandler } from '../n8nLlmFailedAttemptHandler';
 import { N8nLlmTracing } from '../N8nLlmTracing';
 
+// Non-secret placeholder for OpenAI client initialization when API key is optional
+// Actual authentication happens via Authorization header in configuration
+const OPTIONAL_API_KEY_PLACEHOLDER = 'not-used-for-auth';
+
 export class LmLemonade implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Lemonade Model',
@@ -77,8 +81,10 @@ export class LmLemonade implements INodeType {
 			stop = stopSequences.length > 0 ? stopSequences : undefined;
 		}
 
-		// Ensure we have an API key for OpenAI client validation
-		const apiKey = credentials.apiKey || 'lemonade-placeholder-key';
+		// OpenAI client requires a non-empty apiKey, but Lemonade API key is optional.
+		// Use placeholder since actual auth happens via Authorization header.
+		// The apiKey parameter is only used for client initialization, not authentication.
+		const apiKey = credentials.apiKey?.trim() || OPTIONAL_API_KEY_PLACEHOLDER;
 
 		// Build configuration object separately like official OpenAI node
 		const configuration: any = {
@@ -86,9 +92,9 @@ export class LmLemonade implements INodeType {
 		};
 
 		// Add custom headers if API key is provided
-		if (credentials.apiKey) {
+		if (credentials.apiKey?.trim()) {
 			configuration.defaultHeaders = {
-				Authorization: `Bearer ${credentials.apiKey}`,
+				Authorization: `Bearer ${credentials.apiKey.trim()}`,
 			};
 		}
 
